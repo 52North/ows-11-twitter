@@ -32,6 +32,7 @@ import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
 import org.n52.socialmedia.model.HumanVisualPerceptionObservation;
 import org.n52.socialmedia.model.Procedure;
+import org.n52.socialmedia.util.StringUtil;
 
 import twitter4j.Status;
 
@@ -58,20 +59,12 @@ public class TwitterMessage implements HumanVisualPerceptionObservation {
 			result.location = new TwitterLocation(tweet.getGeoLocation(), tweet.getPlace());
 			result.createdTime = new DateTime(tweet.getCreatedAt(),DateTimeZone.UTC);
 			result.link = String.format(TWEET_URL, tweet.getUser().getScreenName(), Long.toString(tweet.getId()));
-			result.message = escapeForXML(tweet.getText());
+			result.message = StringUtil.escapeForXML(tweet.getText());
 			return result;
 		}
 		return null;
 	}
 	
-	private static String escapeForXML(String text) {
-		return text.replaceAll("&", "&amp;")
-				.replaceAll("\"", "&quot;")
-				.replaceAll("'", "&apos;")
-				.replaceAll("<", "&lt;")
-				.replaceAll(">", "&gt;");
-	}
-
 	private static boolean isGeolocated(Status status) {
         return status.getGeoLocation() != null
                 && status.getPlace() != null
@@ -121,7 +114,62 @@ public class TwitterMessage implements HumanVisualPerceptionObservation {
 	public String getResult() {
 		return String.format("\"%s\"", message);
 	}
-	
-	// TODO generate equals and hashcode
 
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result
+				+ ((createdTime == null) ? 0 : createdTime.hashCode());
+		result = prime * result + ((id == null) ? 0 : id.hashCode());
+		result = prime * result + ((link == null) ? 0 : link.hashCode());
+		result = prime * result
+				+ ((location == null) ? 0 : location.hashCode());
+		result = prime * result + ((message == null) ? 0 : message.hashCode());
+		result = prime * result
+				+ ((procedure == null) ? 0 : procedure.hashCode());
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		TwitterMessage other = (TwitterMessage) obj;
+		if (createdTime == null) {
+			if (other.createdTime != null)
+				return false;
+		} else if (!createdTime.equals(other.createdTime))
+			return false;
+		if (id == null) {
+			if (other.id != null)
+				return false;
+		} else if (!id.equals(other.id))
+			return false;
+		if (link == null) {
+			if (other.link != null)
+				return false;
+		} else if (!link.equals(other.link))
+			return false;
+		if (location == null) {
+			if (other.location != null)
+				return false;
+		} else if (!location.equals(other.location))
+			return false;
+		if (message == null) {
+			if (other.message != null)
+				return false;
+		} else if (!message.equals(other.message))
+			return false;
+		if (procedure == null) {
+			if (other.procedure != null)
+				return false;
+		} else if (!procedure.equals(other.procedure))
+			return false;
+		return true;
+	}
 }

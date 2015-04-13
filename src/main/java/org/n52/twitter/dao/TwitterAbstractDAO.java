@@ -53,7 +53,7 @@ import twitter4j.auth.AccessToken;
  * @author <a href="mailto:e.h.juerrens@52north.org">Eike Hinderk J&uuml;rrens</a>
  *
  */
-public class TwitterAbstractDAO {
+public abstract class TwitterAbstractDAO {
 	
 	private static final int TWEETS_TO_LOAD_PER_API_REQUEST = 10;
 
