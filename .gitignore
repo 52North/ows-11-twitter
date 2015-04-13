@@ -2,4 +2,4 @@
 .classpath
 .settings
 .project
-
+**/twitter_credentials.properties
