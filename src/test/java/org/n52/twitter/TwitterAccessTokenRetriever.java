@@ -44,7 +44,7 @@ public class TwitterAccessTokenRetriever {
 	public static void main(String args[]) throws Exception{
 	    // The factory instance is re-useable and thread safe.
 	    Twitter twitter = TwitterFactory.getSingleton();
-	    twitter.setOAuthConsumer("m5icJ3WUNq48M4vUSLMHiVnqR", "hFf7hiC2nKjlNYVdbA3xa1fhEGbu2wbWDjtgkkROuHGKIKtFNh");
+	    twitter.setOAuthConsumer("NOT_SET", "NOT_SET");
 	    RequestToken requestToken = twitter.getOAuthRequestToken();
 	    AccessToken accessToken = null;
 	    BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
