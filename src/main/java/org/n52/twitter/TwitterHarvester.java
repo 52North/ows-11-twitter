@@ -58,7 +58,7 @@ public class TwitterHarvester implements Harvester {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(TwitterHarvester.class);
 	
-	private static final String TWITTER_CREDENTIALS_PROPERTIES = "/twitter_credentials.properties";
+	public static final String TWITTER_CREDENTIALS_PROPERTIES = "/twitter_credentials.properties";
 	
 	private AccessToken accessToken;
 

@@ -31,7 +31,17 @@
 package org.n52.twitter;
 
 import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.util.Properties;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import twitter4j.Twitter;
 import twitter4j.TwitterException;
@@ -40,18 +50,22 @@ import twitter4j.auth.AccessToken;
 import twitter4j.auth.RequestToken;
 
 public class TwitterAccessTokenRetriever {
+	
+	private static final Logger LOGGER = LoggerFactory.getLogger(TwitterAccessTokenRetriever.class);
+
+	public static Properties props;
 
 	public static void main(String args[]) throws Exception{
-	    // The factory instance is re-useable and thread safe.
+		String[] props = readProperties();
 	    Twitter twitter = TwitterFactory.getSingleton();
-	    twitter.setOAuthConsumer("NOT_SET", "NOT_SET");
+	    twitter.setOAuthConsumer(props[0], props[1]);
 	    RequestToken requestToken = twitter.getOAuthRequestToken();
 	    AccessToken accessToken = null;
 	    BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
 	    while (null == accessToken) {
-	      System.out.println("Open the following URL and grant access to your account:");
-	      System.out.println(requestToken.getAuthorizationURL());
-	      System.out.print("Enter the PIN(if aviailable) or just hit enter.[PIN]:");
+	    	LOGGER.info("Open the following URL and grant access to your account:");
+	    	LOGGER.info(requestToken.getAuthorizationURL());
+	    	LOGGER.info("Enter the PIN(if aviailable) or just hit enter.[PIN]:");
 	      String pin = br.readLine();
 	      try{
 	         if(pin.length() > 0){
@@ -61,23 +75,44 @@ public class TwitterAccessTokenRetriever {
 	         }
 	      } catch (TwitterException te) {
 	        if(401 == te.getStatusCode()){
-	          System.out.println("Unable to get the access token.");
+	        	LOGGER.error("Unable to get the access token.");
 	        }else{
-	          te.printStackTrace();
+	          LOGGER.error(te.getErrorMessage(),te);
 	        }
 	      }
 	    }
-	    //persist to the accessToken for future reference.
-	    storeAccessToken(twitter.verifyCredentials().getId() , accessToken);
-//	    Status status = twitter.updateStatus(args[0]);
-//	    System.out.println("Successfully updated the status to [" + status.getText() + "].");
-	    System.exit(0);
+	    storeAccessToken(accessToken.getToken(), accessToken.getTokenSecret());
 	  }
-	  private static void storeAccessToken(long useId, AccessToken accessToken){
-	    //store accessToken.getToken()
-		System.out.println("Token: " + accessToken.getToken());
-	    //store accessToken.getTokenSecret()
-		System.out.println("Secret: " + accessToken.getTokenSecret());
-	  }
+
+	private static String[] readProperties() {
+		InputStream is = TwitterAccessTokenRetriever.class.getResourceAsStream(TwitterHarvester.TWITTER_CREDENTIALS_PROPERTIES);
+		if (is == null) {
+			throw new IllegalStateException(TwitterHarvester.TWITTER_CREDENTIALS_PROPERTIES + " file not found.");
+		}
+
+		props = new Properties();
+		try {
+			props.load(is);
+			String accessToken = props.getProperty("OAUTH_CONSUMER_KEY");
+			String accessTokenSecret = props.getProperty("OAUTH_CONSUMER_SECRET");
+			return new String[] {accessToken, accessTokenSecret };
+		} catch (IOException e) {
+			LOGGER.warn("properties malformed or unreadable", e);
+			throw new IllegalStateException(e);
+		}
+	}
+	
+	private static void storeAccessToken(String token, String secret){
+		props.setProperty("ACCESS_TOKEN", token);
+		props.setProperty("ACCESS_TOKEN_SECRET", secret);
+
+		try (OutputStream os = new FileOutputStream(new File ("src/test/resources" + TwitterHarvester.TWITTER_CREDENTIALS_PROPERTIES))) {
+			props.store(os, "Infos: SEARCH_TERMS MUST be a comma separated list. Do NOT upload this file to any remote ressource.");
+		} catch (FileNotFoundException e) {
+			LOGGER.error("Could not find file!", e);
+		} catch (IOException e) {
+			LOGGER.error("Error while writing to file", e);
+		}
+	}
 	
 }
