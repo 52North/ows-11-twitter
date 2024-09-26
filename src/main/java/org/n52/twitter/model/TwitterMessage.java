@@ -32,7 +32,6 @@ import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
 import org.n52.socialmedia.model.HumanVisualPerceptionObservation;
 import org.n52.socialmedia.model.Procedure;
-import org.n52.socialmedia.util.StringUtil;
 
 import twitter4j.Status;
 
@@ -59,7 +58,7 @@ public class TwitterMessage implements HumanVisualPerceptionObservation {
 			result.location = new TwitterLocation(tweet.getGeoLocation(), tweet.getPlace());
 			result.createdTime = new DateTime(tweet.getCreatedAt(),DateTimeZone.UTC);
 			result.link = String.format(TWEET_URL, tweet.getUser().getScreenName(), Long.toString(tweet.getId()));
-			result.message = StringUtil.escapeForXML(tweet.getText());
+			result.message = tweet.getText();
 			return result;
 		}
 		return null;
